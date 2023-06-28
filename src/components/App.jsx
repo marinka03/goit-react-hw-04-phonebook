@@ -1,86 +1,83 @@
-import React, { Component } from 'react';
 import { nanoid } from 'nanoid';
+import { useEffect, useState } from 'react';
 import ContactForm from './ContactForm';
 import ContactList from './ContactList';
 import Filter from './Filter';
 
-class App extends Component {
-  state = {
-    contacts: [
-      { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
-      { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
-      { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
-      { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
-    ],
-    filter: '',
-  };
-  componentDidMount() {
-    if (localStorage.getItem('contacts')) {
-      // console.log(JSON.parse(localStorage.getItem('contacts')))
-      const checkStorage = JSON.parse(localStorage.getItem('contacts'));
-      this.setState({ contacts: checkStorage });
-    }
-  }
-  componentDidUpdate(prevProps, prevState) {
-    if (prevState.contacts !== this.state.contacts) {
-      localStorage.setItem('contacts', JSON.stringify(this.state.contacts));
-    }
-  }
+const App = () => {
+  const [contacts, setContacts] = useState([
+    { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
+    { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
+    { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
+    { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
+  ]);
+  const [filter, setFilter] = useState('');
 
-  handleAddContact = e => {
+  let checkStorage;
+  if (localStorage.getItem('contacts')) {
+    checkStorage = JSON.parse(localStorage.getItem('contacts'));
+  }
+  
+  useEffect(() => {
+    setContacts(checkStorage);
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('contacts', JSON.stringify(contacts));
+  }, [contacts]);
+
+  const handleAddContact = e => {
     e.preventDefault();
     const { name, number } = e.target;
     const contactData = {
       name: name.value,
       number: number.value,
     };
+
     const newContact = { id: nanoid(), ...contactData };
-    this.checkNewContact(newContact.name)
+    checkNewContact(newContact.name)
       ? alert(`${newContact.name} is already in contact`)
-      : this.setState(state => ({
-          contacts: [...state.contacts, newContact],
-        }));
-    // localStorage.setItem("contacts", JSON.stringify(this.state.contacts))
-  };
-  checkNewContact = contactName => {
-    return this.state.contacts.some(contact => contact.name === contactName);
+      : setContacts(prevState => {
+          return [...prevState, newContact];
+        });
   };
 
-  findContacts = ({ target: { value } }) => {
-    this.setState({ filter: value });
+  const checkNewContact = contactName => {
+    return contacts.some(contact => contact.name === contactName);
   };
 
-  handleDeleteContact = contactId => {
-    this.setState(prevState => ({
-      contacts: prevState.contacts.filter(contact => contact.id !== contactId),
-    }));
+  const findContacts = ({ target: { value } }) => {
+    setFilter(value);
   };
 
-  render() {
-    const { contacts, filter } = this.state;
-    const filterByName = contacts.filter(contact =>
-      contact.name.toLowerCase().includes(filter.toLowerCase())
+  const handleDeleteContact = contactId => {
+    setContacts(prevState =>
+      prevState.filter(contact => contact.id !== contactId)
     );
+  };
 
-    return (
-      <div
-        style={{
-          textAlign: 'start',
-          padding: '50px',
-        }}
-      >
-        <h1>Phonebook</h1>
-        <ContactForm addContact={this.handleAddContact} />
+  const filterByName = contacts.filter(contact =>
+    contact.name.toLowerCase().includes(filter.toLowerCase())
+  );
 
-        <h2>Contacts</h2>
-        <Filter onChange={this.findContacts} />
-        <ContactList
-          contactsFilter={filterByName}
-          onDelete={this.handleDeleteContact}
-        />
-      </div>
-    );
-  }
-}
+  return (
+    <div
+      style={{
+        textAlign: 'start',
+        padding: '50px',
+      }}
+    >
+      <h1>Phonebook</h1>
+      <ContactForm addContact={handleAddContact} />
+
+      <h2>Contacts</h2>
+      <Filter onChange={findContacts} />
+      <ContactList
+        contactsFilter={filterByName}
+        onDelete={handleDeleteContact}
+      />
+    </div>
+  );
+};
 
 export default App;
