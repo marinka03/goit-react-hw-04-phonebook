@@ -14,27 +14,33 @@ class App extends Component {
     ],
     filter: '',
   };
-  componentDidMount(){
-    if(localStorage.getItem('contacts')){
+  componentDidMount() {
+    if (localStorage.getItem('contacts')) {
       // console.log(JSON.parse(localStorage.getItem('contacts')))
-      const checkStorage = JSON.parse(localStorage.getItem('contacts'))
-      this.setState({contacts: checkStorage})
+      const checkStorage = JSON.parse(localStorage.getItem('contacts'));
+      this.setState({ contacts: checkStorage });
     }
   }
-  componentDidUpdate(prevProps, prevState){
-    if(prevState.contacts !== this.state.contacts){
-      localStorage.setItem('contacts', JSON.stringify(this.state.contacts))
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState.contacts !== this.state.contacts) {
+      localStorage.setItem('contacts', JSON.stringify(this.state.contacts));
     }
   }
 
-  handleAddContact = contactFromForm => {
-    const newContact = { id: nanoid(), ...contactFromForm };
+  handleAddContact = e => {
+    e.preventDefault();
+    const { name, number } = e.target;
+    const contactData = {
+      name: name.value,
+      number: number.value,
+    };
+    const newContact = { id: nanoid(), ...contactData };
     this.checkNewContact(newContact.name)
       ? alert(`${newContact.name} is already in contact`)
       : this.setState(state => ({
           contacts: [...state.contacts, newContact],
         }));
-        // localStorage.setItem("contacts", JSON.stringify(this.state.contacts))
+    // localStorage.setItem("contacts", JSON.stringify(this.state.contacts))
   };
   checkNewContact = contactName => {
     return this.state.contacts.some(contact => contact.name === contactName);
