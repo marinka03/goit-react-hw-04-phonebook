@@ -17,9 +17,10 @@ const App = () => {
   if (localStorage.getItem('contacts')) {
     checkStorage = JSON.parse(localStorage.getItem('contacts'));
   }
-  
+
   useEffect(() => {
     setContacts(checkStorage);
+    // eslint-disable-next-line
   }, []);
 
   useEffect(() => {
